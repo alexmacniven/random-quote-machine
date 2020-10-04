@@ -1,65 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react'
+import './index.css'
 
-class App extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      quote: '',
-      author: ''
-    }
-    this.getQuote = this.getQuote.bind(this)
-  }
-  componentWillMount() {
-    this.getQuote()
-  }
-  getQuote() {
-    // Generates a random string seed
-    const r = Math.random().toString(36).substring(7)
-    const xhr = new XMLHttpRequest()
-    xhr.addEventListener('load', () => {
-      const quote_item = xhr.response['results'][0] 
-      this.setState({
-        quote: quote_item['quote'],
-        author: quote_item['author']
-      })
-    })
-    xhr.open('GET', 'https://api.paperquotes.com/apiv1/quotes/?tags=happiness&random=' + r + '&order=?')
-    xhr.responseType = 'json'
-    xhr.setRequestHeader('Authorization', 'Token 5c8bd899d875c677afd103ea58e56c1a38a86f74')
-    xhr.send()
-  }
-  render() {
-    return (
-      <div>
-        <p id='quote'>{this.state.quote}</p>
-        <p id='author'>{this.state.author}</p>
-        <button id='new-quote' onClick={this.getQuote}>New quote</button>
-      </div>
-    )
-  }
+const App = () => {
+	const [quote, setQuote] = useState('Random quotes are like a box of chocolates...');
+	const [author, setAuthor] = useState('Alex');
+
+	const newQuote = () => {
+		const randInt = Math.random().toString(36).substring(7);
+		const url = 'https://api.paperquotes.com/apiv1/quotes/?tags=happiness&random=' + randInt + '&order=?';
+		const headers = { headers : { 'Authorization': 'Token 5c8bd899d875c677afd103ea58e56c1a38a86f74' } }
+
+		fetch(url, headers)
+			.then(response => response.json())
+			.then(data => {
+				console.log(data);
+				setAuthor(data['results'][0]['author']);
+				setQuote(data['results'][0]['quote']);
+			}); 
+	};
+
+	useEffect(newQuote, []);
+
+	return (
+		<div id='quote-box'>
+			<p id='text'>{quote}</p>
+			<p id='author'>{author}</p>
+			<button id='new-quote' onClick={newQuote}>New quote</button>
+			<a id='tweet-quote' href='twitter.com/intent/tweet'>Tweet</a>
+		</div>
+	);
 }
-
-// function App() {
-//   return (
-//     <div className="App">
-//       <header className="App-header">
-//         <img src={logo} className="App-logo" alt="logo" />
-//         <p>
-//           Edit <code>src/App.js</code> and save to reload.
-//         </p>
-//         <a
-//           className="App-link"
-//           href="https://reactjs.org"
-//           target="_blank"
-//           rel="noopener noreferrer"
-//         >
-//           Learn React
-//         </a>
-//       </header>
-//     </div>
-//   );
-// }
 
 export default App;
